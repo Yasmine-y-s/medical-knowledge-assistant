@@ -1,0 +1,17 @@
+id,title,condition,source,source_url,filename
+1,How Is Alzheimer's Disease Treated?,alzheimers,NIH,"https://www.nia.nih.gov/health/alzheimers-treatment/how-alzheimers-disease-treated",alzheimersTreatmentNIH.pdf
+2,Alzheimer's Disease Genetics Fact Sheet,alzheimers,NIH,"https://www.nia.nih.gov/health/alzheimers-causes-and-risk-factors/alzheimers-disease-genetics-fact-sheet",alzheimersCausesRisksNIH.pdf
+3,What Happens to the Brain in Alzheimer's Disease?,alzheimers,NIH,"https://www.nia.nih.gov/health/alzheimers-causes-and-risk-factors/what-happens-brain-alzheimers-disease",alzheimersNIH.pdf
+4,Anemia in Chronic Kidney Disease,anemia,NIH,"https://www.niddk.nih.gov/health-information/kidney-disease/anemia",anemiaNIH.pdf
+5,Asthma,asthma,WHO,"https://www.who.int/news-room/fact-sheets/detail/asthma",asthmaWHO.pdf
+6,Diabetes & Foot Problems,diabetes,NIH-NIDDK,"https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/foot-problems",diabetesFootProblemsNIH.pdf
+7,Autonomic Neuropathy,diabetes,NIH-NIDDK,"https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/nerve-damage-diabetic-neuropathies/autonomic-neuropathy",diabetesAutonomicNeuropathyNIH.pdf
+8,"Diabetes, Gum Disease, & Other Dental Problems",diabetes,NIH-NIDDK,"https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/gum-disease-dental-problems",diabetesDentalProblemsNIH.pdf
+9,Focal Neuropathies,diabetes,NIH-NIDDK,"https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/nerve-damage-diabetic-neuropathies/focal-neuropathies",diabetesFocalNeuropathyNIH.pdf
+10,Peripheral Neuropathy,diabetes,NIH-NIDDK,"https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/nerve-damage-diabetic-neuropathies/peripheral-neuropathy",diabetesPeripheralNeuropathyNIH.pdf
+11,Proximal Neuropathy,diabetes,NIH-NIDDK,"https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/nerve-damage-diabetic-neuropathies/proximal-neuropathy",diabetesProximalNeuropathyNIH.pdf
+12,Iron-refractory iron deficiency anemia,anemia,MedlinePlus,"https://medlineplus.gov/genetics/condition/iron-refractory-iron-deficiency-anemia/",ironDeficiencyAnemiaMedlinePlus.pdf
+13,Accelerating Breakthroughs: How the Special Diabetes Program Is Creating Hope for those Living with Type 1 Diabetes,diabetes-type-1,NIH-NIDDK,"https://www.niddk.nih.gov/about-niddk/budget-legislative-information/how-special-diabetes-program-creating-hope-living-with-type-1-diabetes",T1DbreakthroughsNIH.pdf
+14,Type 1 Diabetes,diabetes-type-1,NIH-NIDDK,"https://www.niddk.nih.gov/health-information/diabetes/overview/what-is-diabetes/type-1-diabetes",type1DiabetesNIH.pdf
+15,Type 1 Diabetes,diabetes-type-1,CDC,"https://www.cdc.gov/diabetes/about/about-type-1-diabetes.html",type1DiabetesCDC.pdf
+16,About Insulin Resistance and Type 2 Diabetes,diabetes-type-2,CDC,"https://www.cdc.gov/diabetes/about/insulin-resistance-type-2-diabetes.html",type2DiabetesCDC.pdf
