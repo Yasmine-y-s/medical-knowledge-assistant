@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: mka
+      POSTGRES_PASSWORD: mka
+      POSTGRES_DB: medical_knowledge_assistant
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
