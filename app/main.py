@@ -18,9 +18,17 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-
 import os
 from dotenv import load_dotenv
+
+from pgvector.sqlalchemy import Vector
+from app.models import Chunk
+from app.embeddings import embed
+
+from openai import OpenAI
+
+load_dotenv()
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 app = FastAPI(
     title="Medical Knowledge Assistant",
@@ -67,11 +75,15 @@ class UserOut(BaseModel):
     created_at: datetime
     
 class QuestionIn(BaseModel):
-    question: str
+    question: str = Field(min_length=1)
+    
+class SourceOut(BaseModel):
+    title: str
+    source: str
     
 class QuestionOut(BaseModel):
     answer: str
-    sources: list[str] = []
+    sources: list[SourceOut] = []
     
 class LoginRequest(BaseModel):
     email: str
@@ -115,6 +127,7 @@ load_dotenv()
 SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
 def create_access_token(user_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -180,12 +193,41 @@ def delete_document(document_id: int, db: Session = Depends(get_db), user: UserD
     db.commit()
 
 @app.post("/questions", response_model=QuestionOut, tags=["Questions"],
-          summary="Ask a question", description="Placeholder")
-def ask_question(payload: QuestionIn):
-    return QuestionOut(
-        answer=f"RAG not implemented yet. You asked: '{payload.question}'",
-        sources=[]
-    )
+          summary="Ask a question", description="Answers a question using the document corpus via RAG.")
+def ask_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserDB = Depends(get_current_user)):
+    question_embedding = embed(payload.question)
     
+    top_chunks = (
+        db.query(Chunk)
+        .order_by(Chunk.embedding.cosine_distance(question_embedding))
+        .limit(4)
+        .all()
+    )
+    context = "\n\n".join(chunk.content for chunk in top_chunks)
+
+    system_prompt = (
+        "You are a medical knowledge assistant. Answer the user's question using ONLY the "
+        "context provided below. If the context does not contain enough information to answer "
+        "the question, say clearly: 'I don't have enough information to answer this.' "
+        "Do not use any outside knowledge.\n\n"
+        f"Context:\n{context}"
+    )
+
+    completion = client.chat.completions.create(
+        model="gpt-5-nano",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": payload.question},
+        ],
+    )
+        
+    answer = completion.choices[0].message.content
+    
+    sources = [
+        SourceOut(title=chunk.document.title, source=chunk.document.source)
+        for chunk in top_chunks
+    ]
+
+    return QuestionOut(answer=answer, sources=sources)
 
 

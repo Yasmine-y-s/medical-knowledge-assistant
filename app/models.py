@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from app.database import Base
+from pgvector.sqlalchemy import Vector
+from sqlalchemy.orm import relationship
 
 class DocumentDB(Base):
     __tablename__ = "documents"
@@ -21,3 +23,13 @@ class UserDB(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     hashed_password = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+class Chunk(Base):
+    __tablename__ = "chunks"
+
+    id = Column(Integer, primary_key=True)
+    document_id = Column(Integer, ForeignKey("documents.id"), nullable=False)
+    chunk_index = Column(Integer, nullable=False)
+    content = Column(String, nullable=False)
+    embedding = Column(Vector(1536), nullable=True)
+    document = relationship("DocumentDB")
