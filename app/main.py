@@ -27,6 +27,8 @@ from app.embeddings import embed
 
 from openai import OpenAI
 
+from app.rag import answer_question
+
 load_dotenv()
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
@@ -195,39 +197,11 @@ def delete_document(document_id: int, db: Session = Depends(get_db), user: UserD
 @app.post("/questions", response_model=QuestionOut, tags=["Questions"],
           summary="Ask a question", description="Answers a question using the document corpus via RAG.")
 def ask_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserDB = Depends(get_current_user)):
-    question_embedding = embed(payload.question)
+    result = answer_question(payload.question, db)
+    return QuestionOut(
+        answer=result["answer"],
+        sources=[SourceOut(title=s["title"], source=s["source"]) for s in result["sources"]],
+    )
     
-    top_chunks = (
-        db.query(Chunk)
-        .order_by(Chunk.embedding.cosine_distance(question_embedding))
-        .limit(4)
-        .all()
-    )
-    context = "\n\n".join(chunk.content for chunk in top_chunks)
-
-    system_prompt = (
-        "You are a medical knowledge assistant. Answer the user's question using ONLY the "
-        "context provided below. If the context does not contain enough information to answer "
-        "the question, say clearly: 'I don't have enough information to answer this.' "
-        "Do not use any outside knowledge.\n\n"
-        f"Context:\n{context}"
-    )
-
-    completion = client.chat.completions.create(
-        model="gpt-5-nano",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": payload.question},
-        ],
-    )
-        
-    answer = completion.choices[0].message.content
-    
-    sources = [
-        SourceOut(title=chunk.document.title, source=chunk.document.source)
-        for chunk in top_chunks
-    ]
-
-    return QuestionOut(answer=answer, sources=sources)
 
 

@@ -1,0 +1,36 @@
+question,is_answerable,expected_document,expected_keyphrases,condition
+What medications are used to treat Alzheimer's disease?,True,alzheimersTreatmentNIH.pdf,medication|Alzheimer|treat,alzheimers
+Are there FDA-approved drugs available for Alzheimer's?,True,alzheimersTreatmentNIH.pdf,FDA|approved|drug,alzheimers
+Is Alzheimer's disease genetic?,True,alzheimersCausesRisksNIH.pdf,gene|genetic|risk,alzheimers
+What gene increases the risk of developing Alzheimer's?,True,alzheimersCausesRisksNIH.pdf,APOE|gene|risk,alzheimers
+What changes happen in the brain during Alzheimer's disease?,True,alzheimersNIH.pdf,plaque|brain|protein,alzheimers
+How does Alzheimer's disease damage brain cells?,True,alzheimersNIH.pdf,brain cell|damage|protein,alzheimers
+How does chronic kidney disease cause anemia?,True,anemiaNIH.pdf,kidney|anemia|red blood cell,anemia
+What treatments exist for anemia caused by kidney disease?,True,anemiaNIH.pdf,treatment|anemia|kidney,anemia
+What is iron-refractory iron deficiency anemia?,True,ironDeficiencyAnemiaMedlinePlus.pdf,iron|anemia|refractory,anemia
+Is iron-refractory anemia inherited?,True,ironDeficiencyAnemiaMedlinePlus.pdf,gene|inherited|mutation,anemia
+What are the symptoms of asthma?,True,asthmaWHO.pdf,asthma|symptom|breathing,asthma
+What triggers an asthma attack?,True,asthmaWHO.pdf,trigger|asthma|attack,asthma
+How can diabetes affect a person's feet?,True,diabetesFootProblemsNIH.pdf,foot|nerve|diabetes,diabetes
+What foot care steps should people with diabetes take?,True,diabetesFootProblemsNIH.pdf,foot care|diabetes|prevent,diabetes
+What is autonomic neuropathy?,True,diabetesAutonomicNeuropathyNIH.pdf,autonomic|nerve|diabetes,diabetes
+What organs can autonomic neuropathy affect?,True,diabetesAutonomicNeuropathyNIH.pdf,heart|digestion|nerve,diabetes
+How does diabetes affect dental health?,True,diabetesDentalProblemsNIH.pdf,gum disease|dental|diabetes,diabetes
+What dental problems are people with diabetes at risk for?,True,diabetesDentalProblemsNIH.pdf,gum|tooth|infection,diabetes
+What is a focal neuropathy?,True,diabetesFocalNeuropathyNIH.pdf,focal|nerve|sudden,diabetes
+What are the symptoms of peripheral neuropathy?,True,diabetesPeripheralNeuropathyNIH.pdf,numbness|nerve|feet,diabetes
+How is peripheral neuropathy treated?,True,diabetesPeripheralNeuropathyNIH.pdf,treatment|pain|nerve,diabetes
+What is proximal neuropathy?,True,diabetesProximalNeuropathyNIH.pdf,proximal|thigh|weakness,diabetes
+What causes type 1 diabetes?,True,type1DiabetesNIH.pdf,immune system|insulin|pancreas,diabetes-type-1
+How common is type 1 diabetes?,True,type1DiabetesNIH.pdf,common|prevalence|children,diabetes-type-1
+What is the Special Diabetes Program for Type 1?,True,T1DbreakthroughsNIH.pdf,Special Diabetes Program|research|type 1,diabetes-type-1
+How does insulin therapy work for type 1 diabetes?,True,type1DiabetesCDC.pdf,insulin|pancreas|blood glucose,diabetes-type-1
+What are the key points about type 1 diabetes management?,True,type1DiabetesCDC.pdf,insulin|monitor|blood glucose,diabetes-type-1
+What is insulin resistance?,True,type2DiabetesCDC.pdf,insulin resistance|prediabetes|cell,diabetes-type-2
+How does insulin resistance lead to type 2 diabetes?,True,type2DiabetesCDC.pdf,insulin resistance|type 2|blood sugar,diabetes-type-2
+What are the treatment options for breast cancer?,False,,,
+How is a migraine diagnosed?,False,,,
+What causes clinical depression?,False,,,
+What are the symptoms of a stroke?,False,,,
+How is high cholesterol treated?,False,,,
+What is the recommended treatment for osteoporosis?,False,,,
