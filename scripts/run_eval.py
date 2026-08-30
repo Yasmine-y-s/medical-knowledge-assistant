@@ -4,6 +4,7 @@ import json
 
 from app.database import SessionLocal
 from app.rag import answer_question
+from app.models import UserDB
 
 
 def load_dataset(path="eval/dataset.csv"):
@@ -112,10 +113,25 @@ def run():
     dataset = load_dataset()
     db = SessionLocal()
     results = []
+    
+    user = db.query(UserDB).filter(
+        UserDB.email == "test@example.com"
+    ).first()
+
+    if user is None:
+        user = UserDB(
+            email="test@example.com",
+            hashed_password="fake"
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    user_id = user.id
 
     for row in dataset:
         start = time.perf_counter()
-        result = answer_question(row["question"], db)
+        result = answer_question(row["question"], db, user_id)
         elapsed = time.perf_counter() - start
 
         results.append({

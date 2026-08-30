@@ -27,7 +27,7 @@ from app.embeddings import embed
 
 from openai import OpenAI
 
-from app.rag import answer_question
+from app.rag import answer_question, answer_with_agent
 
 load_dotenv()
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
@@ -197,11 +197,21 @@ def delete_document(document_id: int, db: Session = Depends(get_db), user: UserD
 @app.post("/questions", response_model=QuestionOut, tags=["Questions"],
           summary="Ask a question", description="Answers a question using the document corpus via RAG.")
 def ask_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserDB = Depends(get_current_user)):
-    result = answer_question(payload.question, db)
+    result = answer_question(payload.question, db, user.id)
     return QuestionOut(
         answer=result["answer"],
         sources=[SourceOut(title=s["title"], source=s["source"]) for s in result["sources"]],
     )
     
-
-
+@app.post("/agent-questions", response_model=QuestionOut, tags=["Questions"],
+          summary="Ask a question using the AI agent",
+          description="Answers a question using the AI agent and its available tools.")
+def ask_agent_question(
+    payload: QuestionIn,
+    db: Session = Depends(get_db),
+    user: UserDB = Depends(get_current_user)):
+    result = answer_with_agent(payload.question, db, user.id)
+    return QuestionOut(
+        answer=result["answer"],
+        sources=[SourceOut(title=s["title"], source=s["source"]) for s in result["sources"]],
+    )
