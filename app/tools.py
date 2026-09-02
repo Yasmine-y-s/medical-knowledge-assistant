@@ -3,34 +3,14 @@ from app.embeddings import embed
 from app.models import Chunk, DocumentDB, QuestionLog
 
 
-def search_documents(query: str, db: Session) -> dict:
+def search_documents(query: str, vector_store) -> dict:
     if not isinstance(query, str) or not query.strip():
         return {"error": "search_documents requires a non-empty query string"}
 
     try:
         query_embedding = embed(query)
-
-        results = (
-            db.query(Chunk, Chunk.embedding.cosine_distance(query_embedding).label("distance"))
-            .order_by("distance")
-            .limit(4)
-            .all()
-        )
-
-        chunks = [
-            {
-                "chunk_id": chunk.id,
-                "document_id": chunk.document_id,
-                "document_title": chunk.document.title,
-                "document_source": chunk.document.source,
-                "content": chunk.content,
-                "distance": float(distance),
-            }
-            for chunk, distance in results
-        ]
-
+        chunks = vector_store.similarity_search(query_embedding, top_k=4)
         return {"chunks": chunks}
-
     except Exception as e:
         return {"error": f"search_documents failed: {str(e)}"}
     

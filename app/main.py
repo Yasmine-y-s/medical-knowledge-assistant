@@ -1,5 +1,4 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -28,6 +27,18 @@ from app.embeddings import embed
 from openai import OpenAI
 
 from app.rag import answer_question, answer_with_agent
+
+from app.presentation.schemas import (
+    DocumentCreate, Document, UserCreate, UserOut,
+    LoginRequest, QuestionIn, SourceOut, QuestionOut,
+)
+
+from app.infrastructure.openai_llm import OpenAILLM
+from app.infrastructure.pgvector_store import PgVectorStore
+from app.application.ask_question import AskQuestionUseCase
+from app.application.ask_agent import AskAgentUseCase
+
+llm = OpenAILLM()
 
 load_dotenv()
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
@@ -58,38 +69,6 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={"error": {"code": 500, "message": "Internal server error"}},
     )
-class DocumentCreate(BaseModel):
-    title: str = Field(min_length=1, max_length=200)
-    condition: str = Field(pattern=r'^[a-z0-9-]+$')
-    source: str = Field(min_length=1, max_length=100)
-    source_url: str = Field(pattern=r'^https?://')
-    filename: str = Field(pattern=r'^[\w\-]+\.pdf$')
-
-class Document(DocumentCreate):
-    id: int
-class UserCreate(BaseModel):
-    email: str = Field(pattern=r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-    password: str = Field(min_length=8)
-
-class UserOut(BaseModel):
-    id: int
-    email: str
-    created_at: datetime
-    
-class QuestionIn(BaseModel):
-    question: str = Field(min_length=1)
-    
-class SourceOut(BaseModel):
-    title: str
-    source: str
-    
-class QuestionOut(BaseModel):
-    answer: str
-    sources: list[SourceOut] = []
-    
-class LoginRequest(BaseModel):
-    email: str
-    password: str
     
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -193,24 +172,26 @@ def delete_document(document_id: int, db: Session = Depends(get_db), user: UserD
 
     db.delete(doc)
     db.commit()
-
+    
 @app.post("/questions", response_model=QuestionOut, tags=["Questions"],
           summary="Ask a question", description="Answers a question using the document corpus via RAG.")
 def ask_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserDB = Depends(get_current_user)):
-    result = answer_question(payload.question, db, user.id)
+    vector_store = PgVectorStore(db)
+    use_case = AskQuestionUseCase(llm=llm, vector_store=vector_store)
+    result = use_case.execute(payload.question, db, user.id)
+
     return QuestionOut(
         answer=result["answer"],
         sources=[SourceOut(title=s["title"], source=s["source"]) for s in result["sources"]],
     )
     
 @app.post("/agent-questions", response_model=QuestionOut, tags=["Questions"],
-          summary="Ask a question using the AI agent",
-          description="Answers a question using the AI agent and its available tools.")
-def ask_agent_question(
-    payload: QuestionIn,
-    db: Session = Depends(get_db),
-    user: UserDB = Depends(get_current_user)):
-    result = answer_with_agent(payload.question, db, user.id)
+          summary="Ask a question using the AI agent", description="Answers a question using an LLM agent with tool access.")
+def ask_agent_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserDB = Depends(get_current_user)):
+    vector_store = PgVectorStore(db)
+    use_case = AskAgentUseCase(llm=llm, vector_store=vector_store)
+    result = use_case.execute(payload.question, db, user.id)
+
     return QuestionOut(
         answer=result["answer"],
         sources=[SourceOut(title=s["title"], source=s["source"]) for s in result["sources"]],

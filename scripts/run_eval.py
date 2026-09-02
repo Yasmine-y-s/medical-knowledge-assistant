@@ -6,6 +6,10 @@ from app.database import SessionLocal
 from app.rag import answer_question
 from app.models import UserDB
 
+from app.infrastructure.openai_llm import OpenAILLM
+from app.infrastructure.pgvector_store import PgVectorStore
+from app.application.ask_question import AskQuestionUseCase
+
 
 def load_dataset(path="eval/dataset.csv"):
     with open(path, newline="", encoding="utf-8") as f:
@@ -113,6 +117,7 @@ def run():
     dataset = load_dataset()
     db = SessionLocal()
     results = []
+    llm = OpenAILLM()
     
     user = db.query(UserDB).filter(
         UserDB.email == "test@example.com"
@@ -130,8 +135,11 @@ def run():
     user_id = user.id
 
     for row in dataset:
+        vector_store = PgVectorStore(db)
+        use_case = AskQuestionUseCase(llm=llm, vector_store=vector_store)
+
         start = time.perf_counter()
-        result = answer_question(row["question"], db, user_id)
+        result = use_case.execute(row["question"], db, user_id)
         elapsed = time.perf_counter() - start
 
         results.append({
