@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
+from app.domain.interfaces import LLM
 from app.models import DocumentDB
 from app.models import UserDB
 
@@ -38,7 +39,17 @@ from app.infrastructure.pgvector_store import PgVectorStore
 from app.application.ask_question import AskQuestionUseCase
 from app.application.ask_agent import AskAgentUseCase
 
+from sqlalchemy import text
+
+import time
+from app.logging_config import logger
+
+import traceback
+
 llm = OpenAILLM()
+
+def get_llm() -> LLM:
+    return llm
 
 load_dotenv()
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
@@ -48,6 +59,23 @@ app = FastAPI(
     description="Evidence-backed Q&A over a small medical document corpus.",
     version="0.1.0",
 )
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = time.perf_counter()
+    response = await call_next(request)
+    elapsed_ms = (time.perf_counter() - start) * 1000
+
+    logger.info(
+        "request completed",
+        extra={"context": {
+            "path": request.url.path,
+            "method": request.method,
+            "status_code": response.status_code,
+            "latency_ms": round(elapsed_ms, 2),
+        }},
+    )
+    return response
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -65,6 +93,16 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.error(
+        "unhandled exception",
+        extra={"context": {
+            "path": request.url.path,
+            "method": request.method,
+            "exception_type": type(exc).__name__,
+            "exception_message": str(exc),
+            "traceback": traceback.format_exc(),
+        }},
+    )
     return JSONResponse(
         status_code=500,
         content={"error": {"code": 500, "message": "Internal server error"}},
@@ -175,7 +213,7 @@ def delete_document(document_id: int, db: Session = Depends(get_db), user: UserD
     
 @app.post("/questions", response_model=QuestionOut, tags=["Questions"],
           summary="Ask a question", description="Answers a question using the document corpus via RAG.")
-def ask_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserDB = Depends(get_current_user)):
+def ask_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserDB = Depends(get_current_user), llm: LLM = Depends(get_llm)):
     vector_store = PgVectorStore(db)
     use_case = AskQuestionUseCase(llm=llm, vector_store=vector_store)
     result = use_case.execute(payload.question, db, user.id)
@@ -187,7 +225,7 @@ def ask_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserD
     
 @app.post("/agent-questions", response_model=QuestionOut, tags=["Questions"],
           summary="Ask a question using the AI agent", description="Answers a question using an LLM agent with tool access.")
-def ask_agent_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserDB = Depends(get_current_user)):
+def ask_agent_question(payload: QuestionIn, db: Session = Depends(get_db), user: UserDB = Depends(get_current_user), llm: LLM = Depends(get_llm)):
     vector_store = PgVectorStore(db)
     use_case = AskAgentUseCase(llm=llm, vector_store=vector_store)
     result = use_case.execute(payload.question, db, user.id)
@@ -196,3 +234,11 @@ def ask_agent_question(payload: QuestionIn, db: Session = Depends(get_db), user:
         answer=result["answer"],
         sources=[SourceOut(title=s["title"], source=s["source"]) for s in result["sources"]],
     )
+
+@app.get("/health", tags=["meta"])
+def health(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status": "ok"}
+    except Exception:
+        return JSONResponse(status_code=503, content={"status": "unhealthy", "detail": "database unreachable"})

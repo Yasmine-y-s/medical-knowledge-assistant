@@ -2,6 +2,8 @@ from app.domain.interfaces import LLM, VectorStore
 from app.embeddings import embed
 from app.models import QuestionLog
 
+from app.pricing import estimate_cost
+from app.logging_config import logger
 
 class AskQuestionUseCase:
     def __init__(self, llm: LLM, vector_store: VectorStore):
@@ -37,6 +39,17 @@ class AskQuestionUseCase:
             {"title": chunk["document_title"], "source": chunk["document_source"]}
             for chunk in chunks
         ]
+        
+        cost = estimate_cost(response.prompt_tokens, response.completion_tokens)
+        logger.info(
+            "llm call completed",
+            extra={"context": {
+                "use_case": "ask_question",
+                "prompt_tokens": response.prompt_tokens,
+                "completion_tokens": response.completion_tokens,
+                "estimated_cost_usd": cost,
+            }},
+        )
 
         return {
             "answer": response.content,

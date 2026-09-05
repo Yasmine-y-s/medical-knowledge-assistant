@@ -5,8 +5,14 @@ from app.main import app
 from app.database import Base, get_db
 from app.main import get_current_user
 from app.models import UserDB
+from app.main import get_llm
+from app.infrastructure.local_llm import LocalLLM
+import os
 
-TEST_DATABASE_URL = "postgresql+psycopg2://mka:mka@localhost:5432/medical_knowledge_assistant_test"
+TEST_DATABASE_URL = os.environ.get(
+    "DATABASE_URL",
+    "postgresql+psycopg2://mka:mka@localhost:5432/medical_knowledge_assistant_test",
+)
 
 engine = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(bind=engine)
@@ -42,5 +48,7 @@ def override_get_db():
         db.close()
 
 app.dependency_overrides[get_db] = override_get_db
+
+app.dependency_overrides[get_llm] = lambda: LocalLLM()
 
 

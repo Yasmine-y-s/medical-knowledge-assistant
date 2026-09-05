@@ -3,6 +3,9 @@ from app.domain.interfaces import LLM, VectorStore
 from app.models import QuestionLog
 from app.tools import TOOL_SCHEMAS, search_documents, get_document, search_previous_questions, calculate_score
 
+from app.pricing import estimate_cost
+from app.logging_config import logger
+
 AVAILABLE_TOOLS = {
     "search_documents": lambda args, db, user_id, vector_store: search_documents(args["query"], vector_store),
     "get_document": lambda args, db, user_id, vector_store: get_document(args["document_id"], db),
@@ -89,6 +92,18 @@ class AskAgentUseCase:
                     "tool_call_id": tool_call.id,
                     "content": json.dumps(result),
                 })
+        
+        cost = estimate_cost(total_prompt_tokens, total_completion_tokens)
+        logger.info(
+            "llm call completed",
+            extra={"context": {
+                "use_case": "ask_agent",
+                "prompt_tokens": total_prompt_tokens,
+                "completion_tokens": total_completion_tokens,
+                "estimated_cost_usd": cost,
+                "iterations": iteration + 1,
+            }},
+        )
 
         return {
             "answer": "I wasn't able to complete this within the allowed steps.",
