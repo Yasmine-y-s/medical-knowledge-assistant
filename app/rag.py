@@ -1,10 +1,18 @@
+import json
 import os
-from sqlalchemy.orm import Session
+
 from openai import OpenAI
+from sqlalchemy.orm import Session
+
 from app.embeddings import embed
 from app.models import Chunk, QuestionLog
-import json
-from app.tools import TOOL_SCHEMAS, search_documents, get_document, search_previous_questions, calculate_score
+from app.tools import (
+    TOOL_SCHEMAS,
+    calculate_score,
+    get_document,
+    search_documents,
+    search_previous_questions,
+)
 
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 

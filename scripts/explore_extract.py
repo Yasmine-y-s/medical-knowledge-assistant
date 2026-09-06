@@ -1,4 +1,5 @@
 import csv
+
 import fitz
 
 from app.chunking import chunk_text

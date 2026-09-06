@@ -1,50 +1,38 @@
-from fastapi import FastAPI, HTTPException
-
-from fastapi import Depends
-from sqlalchemy.orm import Session
-from app.database import get_db
-from app.domain.interfaces import LLM
-from app.models import DocumentDB
-from app.models import UserDB
-
-from fastapi import Request
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
+import os
+import time
+import traceback
+from datetime import datetime, timedelta, timezone
 
 import bcrypt
-
-from datetime import datetime, timedelta, timezone
 import jwt
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
-import os
 from dotenv import load_dotenv
-
-from pgvector.sqlalchemy import Vector
-from app.models import Chunk
-from app.embeddings import embed
-
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from openai import OpenAI
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.rag import answer_question, answer_with_agent
-
-from app.presentation.schemas import (
-    DocumentCreate, Document, UserCreate, UserOut,
-    LoginRequest, QuestionIn, SourceOut, QuestionOut,
-)
-
+from app.application.ask_agent import AskAgentUseCase
+from app.application.ask_question import AskQuestionUseCase
+from app.database import get_db
+from app.domain.interfaces import LLM
 from app.infrastructure.openai_llm import OpenAILLM
 from app.infrastructure.pgvector_store import PgVectorStore
-from app.application.ask_question import AskQuestionUseCase
-from app.application.ask_agent import AskAgentUseCase
-
-from sqlalchemy import text
-
-import time
 from app.logging_config import logger
-
-import traceback
+from app.models import DocumentDB, UserDB
+from app.presentation.schemas import (
+    Document,
+    DocumentCreate,
+    LoginRequest,
+    QuestionIn,
+    QuestionOut,
+    SourceOut,
+    UserCreate,
+    UserOut,
+)
 
 llm = OpenAILLM()
 
@@ -240,5 +228,5 @@ def health(db: Session = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))
         return {"status": "ok"}
-    except Exception:
+    except Exception: # noqa: BLE001 — tool functions must never raise; broad catch is intentional
         return JSONResponse(status_code=503, content={"status": "unhealthy", "detail": "database unreachable"})

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
+
 from app.embeddings import embed
-from app.models import Chunk, DocumentDB, QuestionLog
+from app.models import DocumentDB, QuestionLog
 
 
 def search_documents(query: str, vector_store) -> dict:
@@ -11,8 +12,8 @@ def search_documents(query: str, vector_store) -> dict:
         query_embedding = embed(query)
         chunks = vector_store.similarity_search(query_embedding, top_k=4)
         return {"chunks": chunks}
-    except Exception as e:
-        return {"error": f"search_documents failed: {str(e)}"}
+    except Exception as e: # noqa: BLE001 — tool functions must never raise; broad catch is intentional
+        return {"error": f"search_documents failed: {e!s}"}
     
 def get_document(document_id: int, db: Session) -> dict:
     try:
@@ -54,8 +55,8 @@ def search_previous_questions(keyword: str, user_id: int, db: Session) -> dict:
             ]
         }
 
-    except Exception as e:
-        return {"error": f"search_previous_questions failed: {str(e)}"}
+    except Exception as e: # noqa: BLE001 — tool functions must never raise; broad catch is intentional
+        return {"error": f"search_previous_questions failed: {e!s}"}
     
 def calculate_score(distances: list[float]) -> dict:
     try:
@@ -69,7 +70,7 @@ def calculate_score(distances: list[float]) -> dict:
         return {"confidence_score": round(confidence, 1)}
 
     except (ValueError, TypeError) as e:
-        return {"error": f"calculate_score received invalid input: {str(e)}"}
+        return {"error": f"calculate_score received invalid input: {e!s}"}
     
 TOOL_SCHEMAS = [
     {

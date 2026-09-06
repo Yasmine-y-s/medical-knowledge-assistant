@@ -1,10 +1,13 @@
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.sql import func
-from app.database import Base
-from pgvector.sqlalchemy import Vector
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+from app.database import Base
+
 
 class DocumentDB(Base):
     __tablename__ = "documents"

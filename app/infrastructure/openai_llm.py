@@ -1,5 +1,7 @@
 import os
+
 from openai import OpenAI
+
 from app.domain.interfaces import LLM, LLMResponse
 
 

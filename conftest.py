@@ -1,13 +1,13 @@
+import os
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.main import app
+
 from app.database import Base, get_db
-from app.main import get_current_user
-from app.models import UserDB
-from app.main import get_llm
 from app.infrastructure.local_llm import LocalLLM
-import os
+from app.main import app, get_current_user, get_llm
+from app.models import UserDB
 
 TEST_DATABASE_URL = os.environ.get(
     "DATABASE_URL",

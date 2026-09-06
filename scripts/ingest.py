@@ -1,14 +1,11 @@
 import csv
-import os
 
 import fitz
 
-from app.embeddings import embed
-
-from app.database import SessionLocal
-from app.models import DocumentDB, UserDB, Chunk
 from app.chunking import chunk_text
-
+from app.database import SessionLocal
+from app.embeddings import embed
+from app.models import Chunk, DocumentDB, UserDB
 
 UPLOADER_EMAIL = "string@string.com"  # change this to your real registered user
 

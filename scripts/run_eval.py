@@ -1,14 +1,12 @@
 import csv
-import time
 import json
+import time
 
+from app.application.ask_question import AskQuestionUseCase
 from app.database import SessionLocal
-from app.rag import answer_question
-from app.models import UserDB
-
 from app.infrastructure.openai_llm import OpenAILLM
 from app.infrastructure.pgvector_store import PgVectorStore
-from app.application.ask_question import AskQuestionUseCase
+from app.models import UserDB
 
 
 def load_dataset(path="eval/dataset.csv"):

@@ -1,9 +1,9 @@
 from app.domain.interfaces import LLM, VectorStore
 from app.embeddings import embed
-from app.models import QuestionLog
-
-from app.pricing import estimate_cost
 from app.logging_config import logger
+from app.models import QuestionLog
+from app.pricing import estimate_cost
+
 
 class AskQuestionUseCase:
     def __init__(self, llm: LLM, vector_store: VectorStore):

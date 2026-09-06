@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+
 from app.domain.interfaces import VectorStore
 from app.models import Chunk
 

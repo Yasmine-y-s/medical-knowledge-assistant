@@ -1,10 +1,16 @@
 import json
-from app.domain.interfaces import LLM, VectorStore
-from app.models import QuestionLog
-from app.tools import TOOL_SCHEMAS, search_documents, get_document, search_previous_questions, calculate_score
 
-from app.pricing import estimate_cost
+from app.domain.interfaces import LLM, VectorStore
 from app.logging_config import logger
+from app.models import QuestionLog
+from app.pricing import estimate_cost
+from app.tools import (
+    TOOL_SCHEMAS,
+    calculate_score,
+    get_document,
+    search_documents,
+    search_previous_questions,
+)
 
 AVAILABLE_TOOLS = {
     "search_documents": lambda args, db, user_id, vector_store: search_documents(args["query"], vector_store),
