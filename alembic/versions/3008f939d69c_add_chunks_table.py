@@ -8,7 +8,7 @@ Create Date: 2026-08-23 21:20:25.400722
 from typing import Sequence, Union
 
 from alembic import op
-import pgvector
+from pgvector.sqlalchemy import VECTOR
 import sqlalchemy as sa
 
 
@@ -28,7 +28,7 @@ def upgrade() -> None:
     sa.Column('document_id', sa.Integer(), nullable=False),
     sa.Column('chunk_index', sa.Integer(), nullable=False),
     sa.Column('content', sa.String(), nullable=False),
-    sa.Column('embedding', pgvector.sqlalchemy.vector.VECTOR(dim=1536), nullable=True),
+    sa.Column('embedding', VECTOR(dim=1536), nullable=True),
     sa.ForeignKeyConstraint(['document_id'], ['documents.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
